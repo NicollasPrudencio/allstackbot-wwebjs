@@ -9,6 +9,12 @@ app.use(express.json());
 // Configurar o cliente do WhatsApp
 const client = new Client();
 
+// Memória do bot para armazenar a relação entre repositório e grupo
+const repoGroupMap = {
+    'api-allstack': '120363129757303262@g.us',
+    'frontend': '120363148607141306@g.us'
+};
+
 // Autenticar usando o código QR
 client.on('qr', (qrCode, scanStatus) => {
     qrcode.generate(qrCode, { small: true }); // Renderizar o código QR no terminal
@@ -37,24 +43,34 @@ function startListening() {
             const commitDate = new Date(commit.timestamp).toLocaleString(); // Obter a data formatada
             const repoName = getRepoNameFromCommitURL(commitURL);
 
-            // Verificar o nome do repositório e definir o ID do grupo correspondente
-            let groupID;
-            if (repoName === 'api-allstack') {
-                groupID = '120363129757303262@g.us';
-            } else if (repoName === 'frontend') {
-                groupID = '120363148607141306@g.us';
+            // Verificar se o repositório está na memória
+            if (repoGroupMap.hasOwnProperty(repoName)) {
+                const groupID = repoGroupMap[repoName];
+
+                // Enviar a mensagem para o grupo específico no WhatsApp
+                const message = `Novo commit no repo "${repoName}":\n\nNome: ${commitMessage}\nUsuário: ${commitAuthor}\nURL: ${commitURL}\nData: ${commitDate}`;
+
+                client.sendMessage(groupID, message)
+                    .then(() => {
+                        console.log('Mensagem enviada com sucesso!');
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao enviar a mensagem:', error);
+                    });
+            } else {
+                // Repositório desconhecido, preparar notificação para configuração
+                const notificationMessage = `Recebi uma requisição do repo chamado ${repoName}. Qual grupo devo relacioná-lo?`;
+
+                // Enviar a mensagem de notificação para o grupo específico no WhatsApp
+                const groupID = '120363148607141306@g.us';
+                client.sendMessage(groupID, notificationMessage)
+                    .then(() => {
+                        console.log('Notificação de configuração enviada com sucesso!');
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao enviar a notificação de configuração:', error);
+                    });
             }
-
-            // Enviar a mensagem para o grupo específico no WhatsApp
-            const message = `Novo commit no repo "${repoName}":\n\nNome: ${commitMessage}\nUsuário: ${commitAuthor}\nURL: ${commitURL}\nData: ${commitDate}`;
-
-            client.sendMessage(groupID, message)
-                .then(() => {
-                    console.log('Mensagem enviada com sucesso!');
-                })
-                .catch((error) => {
-                    console.error('Erro ao enviar a mensagem:', error);
-                });
         }
 
         res.sendStatus(200);
@@ -70,25 +86,31 @@ function startListening() {
             const chat = await message.getChat();
             chat.sendSeen();
             message.react('🟢');
+
+            // Extrair o ID do grupo da mensagem
+            const groupID = body.split('$asb ')[1];
+
+            // Verificar se o grupo é válido
+            if (groupID) {
+                const repoName = getRepoNameFromCommitURL(commitURL);
+
+                // Adicionar o repositório e o grupo na memória
+                repoGroupMap[repoName] = groupID;
+
+                // Enviar a mensagem de confirmação
+                const confirmationMessage = 'Obrigado, fiz a relação correta e agora reconheço este repo para enviar notificações de commit no grupo informado.';
+                client.sendMessage(from, confirmationMessage)
+                    .then(() => {
+                        console.log('Mensagem de confirmação enviada com sucesso!');
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao enviar a mensagem de confirmação:', error);
+                    });
+            }
         }
-    });
-
-    // Enviar a mensagem de boas-vindas ao grupo específico no WhatsApp
-    client.on('ready', () => {
-        const groupID = '120363148607141306@g.us';
-        const message = 'Estou pronto e ouvindo. No que posso ajudar?';
-
-        client.sendMessage(groupID, message)
-            .then(() => {
-                console.log('Mensagem de boas-vindas enviada com sucesso!');
-            })
-            .catch((error) => {
-                console.error('Erro ao enviar a mensagem de boas-vindas:', error);
-            });
     });
 
     app.listen(port, () => {
         console.log(`Servidor rodando na porta ${port}`);
     });
 }
-
