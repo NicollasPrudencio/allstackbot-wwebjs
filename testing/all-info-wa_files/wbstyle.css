@@ -1,0 +1,56 @@
+#whatsappchat{
+	position: fixed;
+	z-index: 999; 
+	bottom: 15px;
+}
+.whatsapptext{
+	background-color: #ededed;
+	padding: 8px 10px;
+	border-radius: 14px;
+	position: relative;
+	margin-right: 5px;
+	color: black;
+	vertical-align: middle;
+}
+html[dir='rtl'] .whatsapptext::after {
+	content: '';
+	position: absolute;
+	border-bottom: solid 10px transparent;
+	border-left: solid 10px #ededed;
+	border-top: solid 10px transparent;
+	right: -6px;
+	top: 5px;
+}
+html[dir='ltr'] .whatsapptext::before {
+	content: '';
+	position: absolute;
+	border-bottom: solid 10px transparent;
+	border-right: solid 10px #ededed;
+	border-top: solid 10px transparent;
+	left: -6px;
+	top: 5px;
+}
+.whatsappimage{
+	height: 40px;
+	  transform: scale(.7);
+	content:url('../images/whatsapp-min.png');
+}
+html[dir='ltr'] #whatsappchat{
+	left: 15px; 
+	direction: ltr;
+}
+html[dir='ltr'] .whatsapp-ico{
+	height: 19px;
+	margin-right: 5px;
+	content:url('../images/whatsappRightIcon.png');
+}
+
+html[dir='rtl'] #whatsappchat{
+	right: 15px; 
+	direction: rtl;
+}
+html[dir='rtl'] .whatsapp-ico{
+	height: 19px;
+	margin-left: 5px;
+	content:url('../images/whatsappLeftIcon.png');
+}
