@@ -12,9 +12,17 @@ const client = new Client();
 const mainGroupID = '120363092460966035@g.us'; // ID do grupo principal
 const commands = [
     { name: 'comandos', status: 'active' },
-    { name: 'ajuda', status: 'active' },
-    { name: 'saudacao', status: 'inactive' }
+    { name: 'ajuda', status: 'inactive' },
+    { name: 'saudacao', status: 'inactive' },
+    { name: 'ignorar', status: 'active' },
+    { name: 'ignorar repo', status: 'active' }
 ];
+
+// Memória para armazenar atributos e valores
+const memory = {
+    'api-allstack': '120363129757303262@g.us',
+    'frontend': '120363148607141306@g.us'
+};
 
 // Autenticar usando o código QR
 client.on('qr', (qrCode, scanStatus) => {
@@ -44,11 +52,20 @@ function startListening() {
             const commitDate = new Date(commit.timestamp).toLocaleString();
             const repoName = getRepoNameFromCommitURL(commitURL);
 
-            let groupID;
-            if (repoName === 'api-allstack') {
-                groupID = '120363129757303262@g.us';
-            } else if (repoName === 'frontend') {
-                groupID = '120363148607141306@g.us';
+            let groupID = memory[repoName];
+
+            if (!groupID) {
+                const helpMessage = `Preciso de ajuda! Recebi demandas do repositório do Github chamado "${repoName}". Qual grupo da squad que ele pertence?`;
+                client.sendMessage(mainGroupID, helpMessage)
+                    .then(() => {
+                        console.log('Mensagem de ajuda enviada com sucesso!');
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao enviar a mensagem de ajuda:', error);
+                    });
+
+                res.sendStatus(200);
+                return;
             }
 
             const message = `Novo commit no repo "${repoName}":\n\nNome: ${commitMessage}\nUsuário: ${commitAuthor}\nURL: ${commitURL}\nData: ${commitDate}`;
@@ -89,6 +106,44 @@ function startListening() {
                             console.error('Erro ao enviar a mensagem com comandos:', error);
                             message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                         });
+                } else if (command === 'ignorar') {
+                    const repoName = body.split(' ')[2];
+                    if (repoName) {
+                        memory[repoName] = ''; // Limpar o valor do grupo para ignorar as notificações
+                        const response = `Requisições do repositório "${repoName}" serão ignoradas.`;
+                        client.sendMessage(mainGroupID, response)
+                            .then(() => {
+                                console.log('Mensagem de ignorar enviada com sucesso!');
+                                message.react('🟢'); // Reagir com o emoji verde quando o comando é reconhecido
+                            })
+                            .catch((error) => {
+                                console.error('Erro ao enviar a mensagem de ignorar:', error);
+                                message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                            });
+                    } else {
+                        const response = 'Comando inválido. Você deve fornecer o nome do repositório para ignorar.';
+                        client.sendMessage(mainGroupID, response)
+                            .then(() => {
+                                console.log('Mensagem de comando inválido enviada com sucesso!');
+                                message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                            })
+                            .catch((error) => {
+                                console.error('Erro ao enviar a mensagem de comando inválido:', error);
+                                message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                            });
+                    }
+                } else if (command === 'ignorar repo') {
+                    memory = {}; // Limpar toda a memória
+                    const response = 'Todas as requisições do bot serão ignoradas.';
+                    client.sendMessage(mainGroupID, response)
+                        .then(() => {
+                            console.log('Mensagem de ignorar tudo enviada com sucesso!');
+                            message.react('🟢'); // Reagir com o emoji verde quando o comando é reconhecido
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
+                            message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                        });
                 } else {
                     // Outra instrução ou comando não reconhecido
                     chat.sendSeen();
@@ -114,4 +169,12 @@ function startListening() {
     app.listen(port, () => {
         console.log(`Servidor rodando na porta ${port}`);
     });
+}
+
+// Função para obter o nome do repositório a partir da URL do commit
+function getRepoNameFromCommitURL(commitURL) {
+    const repoNameStartIndex = commitURL.indexOf('github.com/') + 11;
+    const repoNameEndIndex = commitURL.indexOf('/', repoNameStartIndex);
+    const repoName = commitURL.substring(repoNameStartIndex, repoNameEndIndex);
+    return repoName;
 }
