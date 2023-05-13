@@ -174,71 +174,75 @@ client.on('message_create', async (message) => {
                             console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
                             message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                         });
-                }
-            } else if (validacao === 1) {
-                const response = `O repositório ${repoName} já está salvo na memoria e já possui um grupo vinculado.`;
-                client.sendMessage(mainGroupID, response)
-                    .then(() => {
-                        console.log('Mensagem de grupo já vinculado enviada com sucesso!');
-                        message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
-                    })
-                    .catch((error) => {
-                        console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
-                        message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
-                    });
-            } else if (validacao === 2) {
-                const response = `O grupo id ${idGroup} informado é inválido. O formato correto é "XXXXXXXXXXXXXXXXXX@g.us".`;
-                client.sendMessage(mainGroupID, response)
-                    .then(() => {
-                        console.log('Mensagem de grupo já vinculado enviada com sucesso!');
-                        message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
-                    })
-                    .catch((error) => {
-                        console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
-                        message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
-                    });
-            } else if (validacao === 3) {
-                const response = `Parametros do comando "informarid" não informados. Use a sintaxe "$asb informarid nome_repo idgrupo".`;
-                client.sendMessage(mainGroupID, response)
-                    .then(() => {
-                        console.log('Mensagem de parametros não informados enviada com sucesso!');
-                        message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
-                    })
-                    .catch((error) => {
-                        console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
-                        message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
-                    });
-            } else {
-                if (command === 'qualid' && chat.isGroup) {
-                    const idDeste = message.to;
-                    const response = `O id deste grupo é:\n\n${idDeste}`;
+                } else if (validacao === 1) {
+                    const response = `O repositório ${repoName} já está salvo na memoria e já possui um grupo vinculado.`;
                     client.sendMessage(mainGroupID, response)
                         .then(() => {
-                            console.log('Mensagem com id do grupo enviada com sucesso!');
-                            message.react('\u{2705}'); // Reagir com o emoji verde quando o comando é reconhecido
+                            console.log('Mensagem de grupo já vinculado enviada com sucesso!');
+                            message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
                         })
                         .catch((error) => {
-                            console.error('Erro ao enviar a mensagem com comandos:', error);
+                            console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
+                            message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                        });
+                } else if (validacao === 2) {
+                    const response = `O grupo id ${idGroup} informado é inválido. O formato correto é "XXXXXXXXXXXXXXXXXX@g.us".`;
+                    client.sendMessage(mainGroupID, response)
+                        .then(() => {
+                            console.log('Mensagem de grupo já vinculado enviada com sucesso!');
+                            message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
+                            message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                        });
+                } else if (validacao === 3) {
+                    const response = `Parametros do comando "informarid" não informados. Use a sintaxe "$asb informarid nome_repo idgrupo".`;
+                    client.sendMessage(mainGroupID, response)
+                        .then(() => {
+                            console.log('Mensagem de parametros não informados enviada com sucesso!');
+                            message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
                             message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                         });
                 } else {
-                    if (command === 'qualid') {
-                        const response = `Este chat não é um grupo, tente novamente em um grupo de conversa.`;
-                        client.sendMessage(message.to, response)
+                    if (command === 'qualid' && chat.isGroup) {
+                        const idDeste = message.to;
+                        const response = `O id deste grupo é:\n\n${idDeste}`;
+                        client.sendMessage(mainGroupID, response)
                             .then(() => {
                                 console.log('Mensagem com id do grupo enviada com sucesso!');
-                                message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
+                                message.react('\u{2705}'); // Reagir com o emoji verde quando o comando é reconhecido
                             })
                             .catch((error) => {
                                 console.error('Erro ao enviar a mensagem com comandos:', error);
                                 message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                             });
+                    } else {
+                        if (command === 'qualid') {
+                            if(!chat.isGroup){
+                                const idDeste = message.to;
+                                const response = `Este chat não é um grupo, tente novamente em um grupo de conversa.`;
+                                client.sendMessage(idDeste, response) // idDeste retorna o id do chat atual que o usuario se encontra
+                                    .then(() => {
+                                        console.log('Mensagem de "não é um grupo de conversa" enviada com sucesso!');
+                                        message.react('\u{274C}'); // Reagir com o emoji verde quando o comando é reconhecido
+                                    })
+                                    .catch((error) => {
+                                        console.error('Erro ao enviar a mensagem com comandos:', error);
+                                        message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                                    });
+                            }
+                        }
                     }
                 }
             }
         }
     }
 });
+
 
 
 
