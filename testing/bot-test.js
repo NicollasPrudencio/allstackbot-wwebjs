@@ -86,7 +86,7 @@ function startListening() {
     client.on('message_create', async (message) => {
         const { body, from } = message;
 
-        if (body.startsWith('$asb')) {
+        if (from && body.startsWith('$asb')) {
             const chat = await message.getChat();
             if (chat.isGroup && chat.id._serialized === mainGroupID) {
                 const command = body.split(' ')[1];
@@ -100,11 +100,11 @@ function startListening() {
                     client.sendMessage(mainGroupID, response)
                         .then(() => {
                             console.log('Mensagem com comandos enviada com sucesso!');
-                            message.react('🟢'); // Reagir com o emoji verde quando o comando é reconhecido
+                            message.react('\u{2705}'); // Reagir com o emoji verde quando o comando é reconhecido
                         })
                         .catch((error) => {
                             console.error('Erro ao enviar a mensagem com comandos:', error);
-                            message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                            message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                         });
                 } else if (command === 'ignorar') {
                     const repoName = body.split(' ')[2];
@@ -114,22 +114,22 @@ function startListening() {
                         client.sendMessage(mainGroupID, response)
                             .then(() => {
                                 console.log('Mensagem de ignorar enviada com sucesso!');
-                                message.react('🟢'); // Reagir com o emoji verde quando o comando é reconhecido
+                                message.react('\u{2705}'); // Reagir com o emoji verde quando o comando é reconhecido
                             })
                             .catch((error) => {
                                 console.error('Erro ao enviar a mensagem de ignorar:', error);
-                                message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                                message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                             });
                     } else {
                         const response = 'Comando inválido. Você deve fornecer o nome do repositório para ignorar.';
                         client.sendMessage(mainGroupID, response)
                             .then(() => {
                                 console.log('Mensagem de comando inválido enviada com sucesso!');
-                                message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                                message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                             })
                             .catch((error) => {
                                 console.error('Erro ao enviar a mensagem de comando inválido:', error);
-                                message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                                message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                             });
                     }
                 } else if (command === 'ignorar repo') {
@@ -138,16 +138,16 @@ function startListening() {
                     client.sendMessage(mainGroupID, response)
                         .then(() => {
                             console.log('Mensagem de ignorar tudo enviada com sucesso!');
-                            message.react('🟢'); // Reagir com o emoji verde quando o comando é reconhecido
+                            message.react('\u{2705}'); // Reagir com o emoji verde quando o comando é reconhecido
                         })
                         .catch((error) => {
                             console.error('Erro ao enviar a mensagem de ignorar tudo:', error);
-                            message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                            message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                         });
                 } else {
                     // Outra instrução ou comando não reconhecido
                     chat.sendSeen();
-                    message.react('🔴'); // Reagir com o emoji vermelho quando o comando não é reconhecido
+                    message.react('\u{274C}'); // Reagir com o emoji vermelho quando o comando não é reconhecido
                 }
             }
         }
