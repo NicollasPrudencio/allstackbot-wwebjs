@@ -94,13 +94,7 @@ client.on('message_create', async (message) => {
     console.log("message: ", message);
 
     if (from && body.startsWith('$asb') && chat.isGroup && chat.id._serialized === mainGroupID) {
-        const command = body.split(' ');
-        if(command.length === 4){
-            const repoName = body.split(' ')[2];
-            const idGroup = body.split(' ')[3];
-            const validacao = validacaoInformarID(repoName, idGroup);
-        }
-
+        const command = body.split(' ')[1];
         console.log("Msg dividida para pegar comando: ", command);
         if (chat.isGroup && chat.id._serialized === mainGroupID) {
             // sufixo "$asb" para invocar o bot
@@ -163,6 +157,9 @@ client.on('message_create', async (message) => {
             } else if (command === 'informarid') {
                 // $asb informarid repo idGrupo
                 //coletar repo do parametro
+                const repoName = body.split(' ')[2];
+                const idGroup = body.split(' ')[3];
+                const validacao = validacaoInformarID(repoName, idGroup);
                 console.log(validacao);
                 if (validacao === true) {
                     memory.main[repoName] = idGroup;    // Salvar a relação do grupo e repo na memoria do bot
